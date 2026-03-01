@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+ 
+    <meta charset="UTF-8">
+    <title>РОЛКА ПО ДРОНАМ</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+</head>
+<body>
+<div class="container">
+    <h1>РОЛКА ПО ДРОНАМ</h1>
+
+    <div id="auth-container" style="display:block;"> <!-- Начальное состояние -->
+        <form id="login-form">
+            <label for="nickname-input">Введите ваш никнейм:</label>
+            <input type="text" id="nickname-input" placeholder="Никнейм..." required autofocus />
+            <button type="submit">Войти</button>
+        </form>
+    </div>
+
+    <div id="chat-container" style="display:none;"> <!-- Скрытое состояние -->
+        <div id="chat-window"></div>
+        <form id="message-form">
+            <textarea id="message-input" placeholder="Напишите сообщение..." rows="2" required></textarea>
+            <button type="submit">Отправить</button>
+        </form>
+        <div id="users-list" class="users-list">
+            <h3>Пользователи онлайн:</h3>
+            <ul id="online-users"></ul>
+        </div>
+    </div>
+</div>
+   <script src="/socket.io/socket.io.js"></script>
+<script src="script.js"></script>
+</body>
+</html>

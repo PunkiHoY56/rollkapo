@@ -1,0 +1,169 @@
+* {
+    box-sizing: border-box;
+}
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #f7f7f7;
+    color: #333;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.container {
+    width: 60%;
+    max-width: 800px;
+    min-height: 500px;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    overflow: hidden;
+    position: relative;
+}
+
+h1 {
+    text-align: center;
+    font-size: 3rem;
+    color: #ffc107;
+    letter-spacing: 2px;
+    padding-top: 20px;
+    margin-bottom: 0;
+}
+
+#chat-window {
+    height: calc(100% - 120px); /* высота окна сообщений */
+    padding: 20px;
+    overflow-y: auto;
+    word-wrap: break-word;
+}
+
+.message {
+    margin-bottom: 15px;
+    clear: both;
+}
+
+.username {
+    float: left;
+    font-weight: bold;
+    color: #00bcd4;
+    margin-right: 10px;
+}
+
+.text {
+    float: left;
+    max-width: 80%;
+    background-color: #dfe6ed;
+    padding: 10px;
+    border-radius: 10px;
+    line-height: 1.5;
+    white-space: pre-line;
+}
+
+#message-form {
+    display: block;
+    width: 100%;
+    padding: 20px;
+    background-color: #ececec;
+    border-top: 1px solid #ddd;
+}
+
+#username-input,
+#message-input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    resize: none;
+    outline: none;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+button[type="submit"] {
+    cursor: pointer;
+    padding: 10px 20px;
+    background-color: #ffc107;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    transition: all .3s ease-in-out;
+}
+
+button[type="submit"]:hover {
+    background-color: #ffa726;
+}
+
+#auth-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 20px;
+}
+
+#auth-container input {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 10px;
+    resize: none;
+    outline: none;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+#auth-container button {
+    cursor: pointer;
+    padding: 10px 20px;
+    background-color: #ffc107;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    transition: all .3s ease-in-out;
+}
+
+#auth-container button:hover {
+    background-color: #ffa726;
+}
+
+.users-list {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 200px;
+    background-color: #fdfdfd;
+    padding: 10px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    z-index: 10;
+}
+
+.users-list h3 {
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+}
+
+.users-list ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.users-list li {
+    margin-bottom: 5px;
+}
+
+.ban-button {
+    cursor: pointer;
+    font-size: 16px;
+    color: red;
+    vertical-align: middle;
+    margin-left: 5px;
+}
+
+.delete-message {
+    cursor: pointer;
+    font-size: 16px;
+    color: black;
+    vertical-align: middle;
+    margin-left: 5px;
+}
