@@ -1,37 +1,116 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
- 
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>РОЛКА ПО ДРОНАМ</title>
-    <link rel="stylesheet" href="style.css">
+
+    <link rel="stylesheet" href="/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Roboto&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: 'Roboto', sans-serif;
+            background: #111;
+            color: white;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+        }
+
+        #chat-window {
+            height: 400px;
+            overflow-y: auto;
+            background: #1e1e1e;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .message {
+            margin-bottom: 8px;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        #chat-container {
+            display: none;
+        }
+
+        textarea {
+            width: 100%;
+            resize: none;
+        }
+
+        input, textarea, button {
+            padding: 8px;
+            border-radius: 5px;
+            border: none;
+        }
+
+        button {
+            background: #4CAF50;
+            color: white;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        .users-list {
+            margin-top: 15px;
+            background: #1e1e1e;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+    </style>
 </head>
 <body>
+
 <div class="container">
     <h1>РОЛКА ПО ДРОНАМ</h1>
 
-    <div id="auth-container" style="display:block;"> <!-- Начальное состояние -->
+    <!-- Авторизация -->
+    <div id="auth-container">
         <form id="login-form">
-            <label for="nickname-input">Введите ваш никнейм:</label>
-            <input type="text" id="nickname-input" placeholder="Никнейм..." required autofocus />
+            <label for="nickname-input">Введите ваш никнейм:</label><br><br>
+            <input type="text" id="nickname-input" placeholder="Никнейм..." required autofocus>
             <button type="submit">Войти</button>
         </form>
     </div>
 
-    <div id="chat-container" style="display:none;"> <!-- Скрытое состояние -->
+    <!-- Чат -->
+    <div id="chat-container">
         <div id="chat-window"></div>
+
         <form id="message-form">
             <textarea id="message-input" placeholder="Напишите сообщение..." rows="2" required></textarea>
             <button type="submit">Отправить</button>
         </form>
+
         <div id="users-list" class="users-list">
             <h3>Пользователи онлайн:</h3>
             <ul id="online-users"></ul>
         </div>
     </div>
 </div>
-   <script src="/socket.io/socket.io.js"></script>
-<script src="script.js" defer></script>
+
+<!-- Socket.io -->
+<script src="/socket.io/socket.io.js"></script>
+
+<!-- Твой JS -->
+<script src="/script.js"></script>
+
 </body>
 </html>
