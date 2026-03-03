@@ -7,7 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const messageForm = document.getElementById('message-form');
     const messageInput = document.getElementById('message-input');
     // Подключаемся к серверу
-    const socket = io('http:localhost:3000');
+    const socket = io();
     socket.on('authorized', () => {
         console.log('Получил событие authorized от сервера.');
         authContainer.style.display = "none";
