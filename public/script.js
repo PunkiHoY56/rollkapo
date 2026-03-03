@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
+
     const authContainer = document.getElementById('auth-container');
     const loginForm = document.getElementById('login-form');
     const nicknameInput = document.getElementById('nickname-input');
@@ -6,122 +7,147 @@ document.addEventListener('DOMContentLoaded', () => {
     const chatWindow = document.getElementById('chat-window');
     const messageForm = document.getElementById('message-form');
     const messageInput = document.getElementById('message-input');
-    // Подключаемся к серверу
+
+    // ✅ Подключение без указания localhost
     const socket = io();
+
+    let currentUsername = null;
+
+    // =====================
+    // SOCKET EVENTS
+    // =====================
+
+    socket.on('connect', () => {
+        console.log('Соединение установлено');
+    });
+
+    socket.on('disconnect', () => {
+        console.warn('Соединение потеряно');
+    });
+
     socket.on('authorized', () => {
-        console.log('Получил событие authorized от сервера.');
         authContainer.style.display = "none";
         chatContainer.style.display = "block";
         socket.emit('join');
-    })
+    });
+
     socket.on('nickname_taken', () => {
-        console.warn('Никнейм занят.');
-    })
+        alert("Никнейм уже занят!");
+    });
+
     socket.on('access-denied', (reason) => {
-        console.error(reason);
-    })
-
-    // Имя текущего пользователя
-    let currentUsername;
-
-    // Авторизация пользователя
-    loginForm.addEventListener('submit', async (event) => {
-        event.preventDefault();
-        const enteredNickname = nicknameInput.value.trim();
-        if (!enteredNickname) return alert("Выберите никнейм!");
-        currentUsername = enteredNickname;
-        socket.emit('register_user', { user: currentUsername });
+        alert(reason);
     });
 
-    // Обновляем логику авторизации
-    socket.on('authorized', () => {
-        authContainer.style.display = "none";
-        chatContainer.style.display = "block";
-        socket.emit('join'); // Запрашиваем историю сообщений
-    });
-
-    // Доступ к бану доступен только администратору
-    function enableBanTool() {
-        const usersList = document.getElementById('online-users');
-        usersList.addEventListener('click', (event) => {
-            if (event.target.classList.contains('ban-button')) {
-                const targetUser = event.target.dataset.user;
-                socket.emit('ban_user', targetUser); // Отправляем команду на сервер
-            }
-        });
-    }
-
-    // Обновляем логику отображения списка пользователей
     socket.on('update_users_list', (users) => {
         const usersListEl = document.getElementById('online-users');
-        while (usersListEl.firstChild) {
-            usersListEl.removeChild(usersListEl.lastChild); // Очищаем старый список
-        }
+        usersListEl.innerHTML = "";
+
         users.forEach(user => {
             const li = document.createElement('li');
             li.textContent = user;
+
             const banButton = document.createElement('button');
             banButton.classList.add('ban-button');
-            banButton.title = 'Забанить пользователя';
             banButton.textContent = '⛔';
             banButton.dataset.user = user;
-            li.append(banButton);
+
+            li.appendChild(banButton);
             usersListEl.appendChild(li);
         });
     });
 
-    // Получаем историю сообщений
     socket.on('load_history', (messages) => {
-        messages.forEach((msg) => {
-            addMessage(msg); // Выводим предыдущее сообщение
-        });
+        chatWindow.innerHTML = "";
+        messages.forEach(addMessage);
     });
 
-    // Отправляем сообщение на сервер
+    socket.on('new_message', addMessage);
+
+    socket.on('remove_message', (messageId) => {
+        const msg = document.querySelector(`[data-message-id="${messageId}"]`);
+        if (msg) msg.remove();
+    });
+
+    // =====================
+    // LOGIN
+    // =====================
+
+    loginForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+
+        const nickname = nicknameInput.value.trim();
+        if (!nickname) {
+            alert("Введите ник!");
+            return;
+        }
+
+        currentUsername = nickname;
+        socket.emit('register_user', { user: nickname });
+    });
+
+    // =====================
+    // SEND MESSAGE
+    // =====================
+
     messageForm.addEventListener('submit', (event) => {
         event.preventDefault();
+
         const msgText = messageInput.value.trim();
-        if (!msgText) return;
-        socket.emit('send_message', { user: currentUsername, msg: msgText });
-        messageInput.value = '';
+        if (!msgText || !currentUsername) return;
+
+        socket.emit('send_message', {
+            user: currentUsername,
+            msg: msgText
+        });
+
+        messageInput.value = "";
     });
 
-    // Новые сообщения поступают от сервера
-    socket.on('new_message', (fullMsg) => {
-        addMessage(fullMsg); // Выводим новое сообщение
-    });
+    // =====================
+    // BAN CLICK
+    // =====================
 
-    // Обработчик кликов по кнопкам удаления сообщений
-    document.getElementById('chat-window').addEventListener('click', (event) => {
-        if (event.target.classList.contains('delete-message')) {
-            const messageId = event.target.closest('.message').dataset.messageId;
-            socket.emit('delete_message', messageId); // Отправляем команду на сервер
+    document.getElementById('online-users').addEventListener('click', (event) => {
+        if (event.target.classList.contains('ban-button')) {
+            const targetUser = event.target.dataset.user;
+            socket.emit('ban_user', targetUser);
         }
     });
 
-    // Обновляем интерфейс при удалении сообщения
-    socket.on('remove_message', (messageId) => {
-        const removedMessage = document.querySelector(`[data-message-id="${messageId}"]`);
-        if (removedMessage) {
-            removedMessage.remove(); // Удаляем сообщение из интерфейса
-        }
-    });
+    // =====================
+    // ADD MESSAGE
+    // =====================
 
-    // Добавляем сообщение в UI
     function addMessage(messageObj) {
+
         const newMessageDiv = document.createElement('div');
         newMessageDiv.classList.add('message');
-        newMessageDiv.dataset.messageId = messageObj._id; // Уникальный идентификатор сообщения
+        newMessageDiv.dataset.messageId = messageObj._id;
+
+        // ✅ Защита от XSS
+        const safeUser = escapeHtml(messageObj.user);
+        const safeMsg = escapeHtml(messageObj.message);
+
         newMessageDiv.innerHTML = `
-            <strong>${messageObj.user}</strong> <small>(${messageObj.time})</small>: <span class="text">${messageObj.message}</span>
-            <button class="delete-message" title="Удалить сообщение">🗑️</button>
+            <strong>${safeUser}</strong> 
+            <small>(${messageObj.time})</small>: 
+            <span>${safeMsg}</span>
+            <button class="delete-message">🗑️</button>
         `;
+
         chatWindow.appendChild(newMessageDiv);
         scrollToBottom();
     }
 
-    // Прокручиваем окно сообщений вниз
     function scrollToBottom() {
         chatWindow.scrollTop = chatWindow.scrollHeight;
     }
+
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
 });
