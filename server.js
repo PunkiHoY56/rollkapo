@@ -24,10 +24,10 @@ const server = http.createServer(app);
 const io = new Server(server);
 
 // Отдача статических файлов
-app.use(express.static(__dirname));
+app.use(express.static(__dirname + "/public"));
 
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+    res.sendFile(path.join(__dirname + "/public/index.html"));
 });
 
 // ======================
