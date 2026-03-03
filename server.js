@@ -135,7 +135,7 @@ io.on('connection', (socket) => {
 // 🔹 Запуск сервера
 // ======================
 
-const PORT = process.env.PORT || 80;
+const PORT = process.env.PORT || 3000;
 
 server.listen(PORT, '0.0.0.0', () => {
     console.log(`🚀 Сервер запущен на порту ${PORT}`);
