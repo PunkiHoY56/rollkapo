@@ -1,169 +1,248 @@
 * {
     box-sizing: border-box;
-}
-body {
-    font-family: 'Roboto', sans-serif;
-    background-color: #f7f7f7;
-    color: #333;
     margin: 0;
     padding: 0;
+}
+
+body {
+    font-family: 'Roboto', sans-serif;
+    background: linear-gradient(135deg, #f5f7fa, #e4edf5);
     display: flex;
     justify-content: center;
     align-items: center;
     height: 100vh;
 }
 
+/* Основное окно */
 .container {
-    width: 60%;
-    max-width: 800px;
-    min-height: 500px;
-    background-color: white;
-    border-radius: 10px;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    width: 90%;
+    max-width: 950px;
+    height: 90vh;
+    background: #ffffff;
+    border-radius: 20px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.08);
+    display: flex;
+    flex-direction: column;
     overflow: hidden;
     position: relative;
 }
 
+/* Заголовок */
 h1 {
     text-align: center;
-    font-size: 3rem;
-    color: #ffc107;
-    letter-spacing: 2px;
-    padding-top: 20px;
-    margin-bottom: 0;
+    padding: 20px;
+    font-size: 1.8rem;
+    background: #ffffff;
+    border-bottom: 1px solid #eee;
+    color: #2c3e50;
+    letter-spacing: 1px;
 }
 
+/* Окно сообщений */
 #chat-window {
-    height: calc(100% - 120px); /* высота окна сообщений */
+    flex: 1;
     padding: 20px;
     overflow-y: auto;
-    word-wrap: break-word;
+    background: #f9fbfd;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
+/* Сообщение */
 .message {
-    margin-bottom: 15px;
-    clear: both;
+    max-width: 70%;
+    padding: 12px 16px;
+    border-radius: 18px;
+    background: #e3f2fd;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+    position: relative;
+    animation: fadeIn 0.2s ease-in-out;
 }
 
-.username {
-    float: left;
-    font-weight: bold;
-    color: #00bcd4;
-    margin-right: 10px;
-}
-
-.text {
-    float: left;
-    max-width: 80%;
-    background-color: #dfe6ed;
-    padding: 10px;
-    border-radius: 10px;
-    line-height: 1.5;
-    white-space: pre-line;
-}
-
-#message-form {
+/* Имя */
+.message strong {
     display: block;
-    width: 100%;
-    padding: 20px;
-    background-color: #ececec;
-    border-top: 1px solid #ddd;
+    font-size: 0.85rem;
+    margin-bottom: 4px;
+    color: #1976d2;
 }
 
-#username-input,
-#message-input {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 10px;
-    resize: none;
-    outline: none;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+/* Время */
+.message small {
+    font-size: 0.7rem;
+    color: #888;
 }
 
-button[type="submit"] {
+/* Текст */
+.message .text {
+    font-size: 0.95rem;
+    line-height: 1.4;
+    white-space: pre-wrap;
+}
+
+/* Кнопка удаления */
+.delete-message {
+    position: absolute;
+    top: 8px;
+    right: 10px;
+    border: none;
+    background: transparent;
     cursor: pointer;
-    padding: 10px 20px;
-    background-color: #ffc107;
+    font-size: 14px;
+    opacity: 0.6;
+    transition: 0.2s;
+}
+
+.delete-message:hover {
+    opacity: 1;
+}
+
+/* Форма отправки */
+#message-form {
+    display: flex;
+    gap: 10px;
+    padding: 15px;
+    background: #ffffff;
+    border-top: 1px solid #eee;
+}
+
+#message-input {
+    flex: 1;
+    resize: none;
+    border-radius: 12px;
+    border: 1px solid #ddd;
+    padding: 10px 12px;
+    font-size: 0.9rem;
+    outline: none;
+    transition: 0.2s;
+}
+
+#message-input:focus {
+    border-color: #1976d2;
+}
+
+/* Кнопка */
+button[type="submit"] {
+    background: #1976d2;
     color: white;
     border: none;
-    border-radius: 5px;
-    transition: all .3s ease-in-out;
+    padding: 10px 18px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: 0.2s;
 }
 
 button[type="submit"]:hover {
-    background-color: #ffa726;
+    background: #1565c0;
 }
 
+/* Авторизация */
 #auth-container {
+    padding: 40px;
     display: flex;
     flex-direction: column;
+    gap: 15px;
     align-items: center;
-    gap: 10px;
-    padding: 20px;
 }
 
 #auth-container input {
-    width: 100%;
-    padding: 10px;
-    margin-bottom: 10px;
-    resize: none;
-    outline: none;
-    border: 1px solid #ccc;
-    border-radius: 5px;
+    width: 80%;
+    padding: 12px;
+    border-radius: 12px;
+    border: 1px solid #ddd;
+    font-size: 0.9rem;
 }
 
 #auth-container button {
-    cursor: pointer;
-    padding: 10px 20px;
-    background-color: #ffc107;
+    background: #1976d2;
     color: white;
     border: none;
-    border-radius: 5px;
-    transition: all .3s ease-in-out;
+    padding: 10px 25px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: 0.2s;
 }
 
 #auth-container button:hover {
-    background-color: #ffa726;
+    background: #1565c0;
 }
 
+/* Пользователи */
 .users-list {
     position: absolute;
-    top: 0;
-    right: 0;
+    top: 70px;
+    right: 15px;
     width: 200px;
-    background-color: #fdfdfd;
-    padding: 10px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    z-index: 10;
+    background: #ffffff;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+    padding: 15px;
 }
 
 .users-list h3 {
-    font-size: 1.2rem;
+    font-size: 0.9rem;
     margin-bottom: 10px;
+    color: #555;
 }
 
 .users-list ul {
-    list-style-type: none;
-    padding: 0;
+    list-style: none;
 }
 
 .users-list li {
-    margin-bottom: 5px;
+    padding: 5px 0;
+    font-size: 0.85rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
 }
 
+/* Бан */
 .ban-button {
+    border: none;
+    background: transparent;
     cursor: pointer;
-    font-size: 16px;
-    color: red;
-    vertical-align: middle;
-    margin-left: 5px;
+    font-size: 14px;
+    color: #d32f2f;
 }
 
-.delete-message {
-    cursor: pointer;
-    font-size: 16px;
-    color: black;
-    vertical-align: middle;
-    margin-left: 5px;
+/* Анимация */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Скролл */
+#chat-window::-webkit-scrollbar {
+    width: 6px;
+}
+
+#chat-window::-webkit-scrollbar-thumb {
+    background: #ccc;
+    border-radius: 10px;
+}
+
+/* Адаптив */
+@media (max-width: 768px) {
+    .container {
+        width: 100%;
+        height: 100vh;
+        border-radius: 0;
+    }
+
+    .users-list {
+        display: none;
+    }
+
+    .message {
+        max-width: 85%;
+    }
 }
