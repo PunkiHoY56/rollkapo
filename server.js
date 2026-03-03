@@ -1,88 +1,142 @@
 const express = require('express');
 const http = require('http');
-const socketIo = require('socket.io');
+const { Server } = require('socket.io');
 const mongoose = require('mongoose');
+const path = require('path');
 
-// Подключаемся к MongoDB
-mongoose.connect('mongodb://localhost/mydatabase', { useNewUrlParser: true, useUnifiedTopology: true }).then(
-    () => console.log('Connected to MongoDB'),
-    err => console.error(err)
-);
+// ======================
+// 🔹 Подключение MongoDB
+// ======================
 
-// Подготовка модели сообщений
+mongoose.connect('mongodb://localhost/mydatabase')
+    .then(() => console.log('✅ Connected to MongoDB'))
+    .catch(err => console.error('MongoDB error:', err));
+
+// Модель сообщений
 const Message = require('./models/Message');
 
-// Списки пользователей и банлисты
+// ======================
+// 🔹 Настройка сервера
+// ======================
+
+const app = express();
+const server = http.createServer(app);
+const io = new Server(server);
+
+// Отдача статических файлов
+app.use(express.static(__dirname));
+
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
+// ======================
+// 🔹 Хранилища
+// ======================
+
+// { nickname: socket }
 let activeUsers = {};
 let bannedUsers = [];
 
-// Создаем HTTP-сервер
-const app = express();
-const server = http.createServer(app);
-const io = socketIo(server);
+// ======================
+// 🔹 Socket.io логика
+// ======================
 
-// Обновляем список пользователей при подключении
 io.on('connection', (socket) => {
-    console.log(`Пользователь ${socket.id} подключился`);
+    console.log(`🔌 Пользователь подключился: ${socket.id}`);
 
     // Регистрация пользователя
     socket.on('register_user', ({ user }) => {
+        if (!user) return;
+
         if (bannedUsers.includes(user)) {
             socket.emit('access_denied', 'Вы заблокированы.');
-            socket.disconnect(true); // Немедленно разрываем соединение
+            socket.disconnect(true);
             return;
         }
+
         if (activeUsers[user]) {
             socket.emit('nickname_taken');
-        } else {
-            activeUsers[user] = true; // Пользователь вошел в сеть
-            console.log(`Отправляю событие authorized для пользователя "${user}".`);
-            socket.emit('authorized');
-            io.emit('update_users_list', Object.keys(activeUsers)); // Обновляем список пользователей
+            return;
         }
+
+        // Сохраняем сокет
+        socket.nickname = user;
+        activeUsers[user] = socket;
+
+        socket.emit('authorized');
+        io.emit('update_users_list', Object.keys(activeUsers));
+
+        console.log(`✅ Пользователь ${user} авторизован`);
     });
 
-    // Прием новых сообщений
-    socket.on('send_message', async (data) => {
-        const newMessage = new Message({
-            user: data.user,
-            message: data.msg,
-            sentAt: new Date()
-        });
-        await newMessage.save(); // Сохраняем сообщение в MongoDB
-        io.emit('new_message', { user: data.user, message: data.msg, time: newMessage.sentAt.toLocaleString() });
+    // Отправка сообщения
+    socket.on('send_message', async ({ user, msg }) => {
+        if (!user || !msg) return;
+
+        try {
+            const newMessage = new Message({
+                user,
+                message: msg,
+                sentAt: new Date()
+            });
+
+            await newMessage.save();
+
+            io.emit('new_message', {
+                id: newMessage._id,
+                user,
+                message: msg,
+                time: newMessage.sentAt.toLocaleString()
+            });
+
+        } catch (err) {
+            console.error('Ошибка сохранения сообщения:', err);
+        }
     });
 
     // Бан пользователя
     socket.on('ban_user', (targetUser) => {
-        if (activeUsers[targetUser]) {
-            bannedUsers.push(targetUser); // Добавляем пользователя в банлист
-            delete activeUsers[targetUser]; // Удаляем из активных
-            io.emit('update_users_list', Object.keys(activeUsers)); // Обновляем список пользователей
-            targetUser.socket.disconnect(true); // Разрываем соединение
-        }
+        if (!activeUsers[targetUser]) return;
+
+        bannedUsers.push(targetUser);
+
+        activeUsers[targetUser].emit('access_denied', 'Вы были заблокированы.');
+        activeUsers[targetUser].disconnect(true);
+
+        delete activeUsers[targetUser];
+
+        io.emit('update_users_list', Object.keys(activeUsers));
+
+        console.log(`🚫 Пользователь ${targetUser} заблокирован`);
     });
 
     // Удаление сообщения
     socket.on('delete_message', async (messageId) => {
         try {
-            await Message.deleteOne({ _id: messageId }); // Удаляем сообщение по его ID
-            io.emit('remove_message', messageId); // Сообщаем всем о удалённом сообщении
+            await Message.deleteOne({ _id: messageId });
+            io.emit('remove_message', messageId);
         } catch (err) {
             console.error('Ошибка при удалении сообщения:', err);
         }
     });
 
-    // Отключение пользователя
+    // Отключение
     socket.on('disconnect', () => {
-        delete activeUsers[socket.nickname];
-        io.emit('update_users_list', Object.keys(activeUsers)); // Обновляем список пользователей
+        if (socket.nickname && activeUsers[socket.nickname]) {
+            delete activeUsers[socket.nickname];
+            io.emit('update_users_list', Object.keys(activeUsers));
+            console.log(`❌ Пользователь ${socket.nickname} отключился`);
+        }
     });
 });
 
-// Запускаем сервер
+// ======================
+// 🔹 Запуск сервера
+// ======================
+
 const PORT = process.env.PORT || 80;
 
 server.listen(PORT, '0.0.0.0', () => {
-    console.log('Сервер запущен на порту ' + PORT);
+    console.log(`🚀 Сервер запущен на порту ${PORT}`);
 });
